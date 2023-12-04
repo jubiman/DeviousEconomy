@@ -23,6 +23,8 @@ public class DeviousEconomy {
 	private static DeviousEconomy instance;
 
 	public DeviousEconomy() {
+		LOGGER.info("DeviousEconomy is loading");
+
 		// Register ourselves for server and other game events we are interested in
 		MinecraftForge.EVENT_BUS.register(this);
 

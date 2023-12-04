@@ -1,9 +1,10 @@
 package com.jubiman.devious.forge.v1_20_1.deviouseconomy.event;
 
-import com.jubiman.devious.forge.v1_20_1.deviousdiscord.Config;
-import com.jubiman.devious.forge.v1_20_1.deviousdiscord.DeviousDiscord;
-import com.jubiman.devious.forge.v1_20_1.deviousdiscord.capability.DeviousCapManager;
-import com.jubiman.devious.forge.v1_20_1.deviousdiscord.capability.DeviousPlayer;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.Config;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.DeviousEconomy;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.capability.DeviousCapManager;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.capability.DeviousPlayer;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.DeviousEconomy;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -14,24 +15,34 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 public class PlayerEventHandler {
 	@SubscribeEvent
 	public static void onPlayerEvent(PlayerEvent event) {
-		if (event instanceof PlayerEvent.PlayerLoggedInEvent
-				|| event instanceof PlayerEvent.PlayerLoggedOutEvent
-				||event instanceof PlayerEvent.StartTracking
-				|| event instanceof PlayerEvent.StopTracking) {
-			return;
+		// Ignore events that don't classify as "active"
+		switch (event.getClass().getSimpleName()) {
+			case "PlayerLoggedInEvent":
+			case "PlayerLoggedOutEvent":
+			case "PlayerRespawnEvent":
+			case "PlayerChangedDimensionEvent":
+			case "PlayerSpawnPhantomsEvent":
+			case "PlayerChangeGameModeEvent":
+			case "StartTracking":
+			case "StopTracking":
+			case "LoadFromFile":
+			case "SaveToFile":
+			case "NameFormat":
+			case "TabListNameFormat":
+			case "Clone":
+				return;
 		}
-		DeviousDiscord.LOGGER.debug("Event type: {}", event.getClass().getSimpleName());
 		DeviousPlayer player = DeviousCapManager.asDeviousPlayer(event.getEntity());
 
-//		DeviousDiscord.LOGGER.debug("Player {} has is active", event.getEntity().getName());
-//		DeviousDiscord.LOGGER.debug("Last coin drop tick: {}", player.lastCoinDropTick);
-//		DeviousDiscord.LOGGER.debug("Current tick: {}", event.getEntity().tickCount);
-//		DeviousDiscord.LOGGER.debug("Coin drop interval: {}", Config.ranks.getCoinDropInterval(player.rank) * 20);
+//		DeviousEconomy.LOGGER.debug("Player {} has is active", event.getEntity().getName());
+//		DeviousEconomy.LOGGER.debug("Last coin drop tick: {}", player.lastCoinDropTick);
+//		DeviousEconomy.LOGGER.debug("Current tick: {}", event.getEntity().tickCount);
+//		DeviousEconomy.LOGGER.debug("Coin drop interval: {}", Config.ranks.getCoinDropInterval(player.rank) * 20);
 
 		// Check last tick and current tick
 		// Get server tick count
 		if (ServerLifecycleHooks.getCurrentServer().getTickCount() - player.lastCoinDropTick > Config.ranks.getCoinDropInterval(player.rank) * 20) {
-			DeviousDiscord.LOGGER.debug("Player {} has received a coin drop", event.getEntity().getName().getString());
+			DeviousEconomy.LOGGER.debug("Player {} has received a coin drop", event.getEntity().getName().getString());
 			// Update last tick
 			player.lastCoinDropTick = ServerLifecycleHooks.getCurrentServer().getTickCount();
 			// Add coins

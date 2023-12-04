@@ -6,17 +6,20 @@ import com.jubiman.devious.forge.v1_20_1.deviouseconomy.DeviousEconomy;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.server.command.EnumArgument;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
 public class DeviousCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, DeviousEconomy deviousDiscord) {
+		DeviousEconomy.LOGGER.info("Registering commands");
 		// Database commands
 		{
 			dispatcher.register(Commands.literal("devious")
@@ -92,12 +95,56 @@ public class DeviousCommand {
 				.redirect(dispatcher.getRoot().getChild("devious").getChild("admin").getChild("database")))
 				.then(Commands.literal("all")
 				.executes(context -> {
+					// Try to run the socket reconnect command if it exists
 					try {
+						// Create temporary stack, so we can run the command and check if it executed successfully
+						CommandSourceStack stack = new CommandSourceStack(new CommandSource() {
+							@Override
+							public void sendSystemMessage(@NotNull Component p_230797_) {
+							}
+
+							@Override
+							public boolean acceptsSuccess() {
+								return true;
+							}
+
+							@Override
+							public boolean acceptsFailure() {
+								return true;
+							}
+
+							@Override
+							public boolean shouldInformAdmins() {
+								return false;
+							}
+						},
+								context.getSource().getPosition(),
+								context.getSource().getRotation(),
+								context.getSource().getLevel(),
+								4,
+								context.getSource().getDisplayName().getString(),
+								context.getSource().getDisplayName(),
+								context.getSource().getServer(),
+								context.getSource().getEntity()
+						);
+						if (dispatcher.execute("devious admin reconnect socket", stack) == -1) {
+							context.getSource().sendFailure(Component.literal("Failed to reconnect to Devious Socket! (See server logs for more info)"));
+						} else {
+							context.getSource().sendSuccess(() -> Component.literal(Config.getIdentifier() + " reconnected to Devious Socket"), false);
+						}
+					} catch (Exception e) {
+						DeviousEconomy.LOGGER.warn("Failed to reconnect to Devious Socket", e);
+						context.getSource().sendFailure(Component.literal("Failed to reconnect to Devious Socket! (See server logs for more info)"));
+						return -1;
+					}
+					// Reconnect to the database
+					try {
+						DeviousEconomy.LOGGER.info("Reconnecting to Devious Database");
 						deviousDiscord.getDatabase().reconnect();
 						context.getSource().sendSuccess(() -> Component.literal(Config.getIdentifier() + " reconnected to Devious Socket and DB"), false);
 					} catch (Exception e) {
-						DeviousEconomy.LOGGER.warn("Failed to reconnect to Devious Socket and DB", e);
-						context.getSource().sendFailure(Component.literal("Failed to reconnect to Devious Socket and DB! (See server logs for more info)"));
+						DeviousEconomy.LOGGER.warn("Failed to reconnect to Devious Database", e);
+						context.getSource().sendFailure(Component.literal("Failed to reconnect to Devious Database! (See server logs for more info)"));
 						return -1;
 					}
 					return 1;

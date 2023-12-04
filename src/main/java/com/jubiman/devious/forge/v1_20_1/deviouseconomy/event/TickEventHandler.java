@@ -1,6 +1,6 @@
 package com.jubiman.devious.forge.v1_20_1.deviouseconomy.event;
 
-import com.jubiman.devious.forge.v1_20_1.deviousdiscord.database.DatabaseConnection;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.database.DatabaseConnection;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
