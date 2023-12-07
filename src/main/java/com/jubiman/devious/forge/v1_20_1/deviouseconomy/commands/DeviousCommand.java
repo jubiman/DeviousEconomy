@@ -6,6 +6,7 @@ import com.jubiman.devious.forge.v1_20_1.deviouseconomy.DeviousEconomy;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -98,40 +99,14 @@ public class DeviousCommand {
 					// Try to run the socket reconnect command if it exists
 					try {
 						// Create temporary stack, so we can run the command and check if it executed successfully
-						CommandSourceStack stack = new CommandSourceStack(new CommandSource() {
-							@Override
-							public void sendSystemMessage(@NotNull Component p_230797_) {
-							}
-
-							@Override
-							public boolean acceptsSuccess() {
-								return true;
-							}
-
-							@Override
-							public boolean acceptsFailure() {
-								return true;
-							}
-
-							@Override
-							public boolean shouldInformAdmins() {
-								return false;
-							}
-						},
-								context.getSource().getPosition(),
-								context.getSource().getRotation(),
-								context.getSource().getLevel(),
-								4,
-								context.getSource().getDisplayName().getString(),
-								context.getSource().getDisplayName(),
-								context.getSource().getServer(),
-								context.getSource().getEntity()
-						);
+						CommandSourceStack stack = CommandUtils.getTemporaryCommandSourceStack(context);
 						if (dispatcher.execute("devious admin reconnect socket", stack) == -1) {
 							context.getSource().sendFailure(Component.literal("Failed to reconnect to Devious Socket! (See server logs for more info)"));
 						} else {
 							context.getSource().sendSuccess(() -> Component.literal(Config.getIdentifier() + " reconnected to Devious Socket"), false);
 						}
+					} catch (CommandSyntaxException ignored) {
+						// if the socket command doesn't exist, ignore the error
 					} catch (Exception e) {
 						DeviousEconomy.LOGGER.warn("Failed to reconnect to Devious Socket", e);
 						context.getSource().sendFailure(Component.literal("Failed to reconnect to Devious Socket! (See server logs for more info)"));

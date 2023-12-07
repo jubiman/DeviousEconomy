@@ -1,6 +1,7 @@
 package com.jubiman.devious.forge.v1_20_1.deviouseconomy;
 
 import com.jubiman.devious.forge.v1_20_1.deviouseconomy.capability.DeviousCapManager;
+import com.jubiman.devious.forge.v1_20_1.deviouseconomy.chunk.ChunkManager;
 import com.jubiman.devious.forge.v1_20_1.deviouseconomy.commands.*;
 import com.jubiman.devious.forge.v1_20_1.deviouseconomy.database.DatabaseConnection;
 import com.mojang.logging.LogUtils;
@@ -53,10 +54,9 @@ public class DeviousEconomy {
 	@SubscribeEvent
 	public void onCommandsRegister(RegisterCommandsEvent event) {
 		DeviousCommand.register(event.getDispatcher(), this);
-
 		BalCommand.register(event.getDispatcher(), this);
-
-		DebugCommands.register(event.getDispatcher(), this);
+		DebugCommands.register(event.getDispatcher());
+		ChunkManager.registerCommand(event.getDispatcher());
 	}
 
 	@SubscribeEvent

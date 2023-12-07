@@ -46,9 +46,13 @@ public class DeviousPlayer {
 	 * @param player The player to bind to.
 	 */
 	void bindPlayer(Player player) {
-		uuid = player.getUUID();
-		rank = DeviousEconomy.getInstance().getDatabase().getRank(uuid);
-		coins = DeviousEconomy.getInstance().getDatabase().getCoins(uuid);
+		try {
+			uuid = player.getUUID();
+			rank = DeviousEconomy.getInstance().getDatabase().getRank(uuid);
+			coins = DeviousEconomy.getInstance().getDatabase().getCoins(uuid);
+		} catch (Exception e) {
+			DeviousEconomy.LOGGER.error("Failed to bind player to capability, most likely due to offline database:", e);
+		}
 		lastCoinDropTick = player.tickCount;
 	}
 

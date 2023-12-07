@@ -12,6 +12,7 @@ public final class Config {
 	private static final ForgeConfigSpec.IntValue reconnectInterval;
 
 	public static final Database database;
+
 	public static final class Database {
 		private final ForgeConfigSpec.ConfigValue<String> hostname;
 		private final ForgeConfigSpec.IntValue port;
@@ -68,6 +69,10 @@ public final class Config {
 		private final ForgeConfigSpec.ConfigValue<Integer> coinDropAmountModeratorMax;
 		private final ForgeConfigSpec.ConfigValue<Integer> coinDropAmountSupporterMin;
 		private final ForgeConfigSpec.ConfigValue<Integer> coinDropAmountSupporterMax;
+		private final ForgeConfigSpec.ConfigValue<Integer> chunkCostDefault;
+		private final ForgeConfigSpec.ConfigValue<Integer> chunkCostAdmin;
+		private final ForgeConfigSpec.ConfigValue<Integer> chunkCostModerator;
+		private final ForgeConfigSpec.ConfigValue<Integer> chunkCostSupporter;
 
 		public Ranks(ForgeConfigSpec.Builder builder) {
 			builder.comment("The amount of coins a player gets when they first join the server.");
@@ -96,6 +101,15 @@ public final class Config {
 					coinDropAmountSupporterMax = builder.define("supporterMax", 300);
 					builder.pop();
 				}
+				builder.pop();
+			}
+			builder.push("chunks");
+			{
+				builder.comment("The amount of coins it costs to claim a chunk.");
+				chunkCostDefault = builder.define("default", 100);
+				chunkCostAdmin = builder.define("admin", 0);
+				chunkCostModerator = builder.define("moderator", 0);
+				chunkCostSupporter = builder.define("supporter", 50);
 				builder.pop();
 			}
 		}
@@ -128,6 +142,15 @@ public final class Config {
 				default -> coinDropAmountDefaultMax.get();
 			};
 			return random.nextInt(min, max + 1);
+		}
+
+		public int getChunkCost(Rank rank) {
+			return switch (rank) {
+				case ADMIN -> chunkCostAdmin.get();
+				case MOD -> chunkCostModerator.get();
+				case SUPPORTER -> chunkCostSupporter.get();
+				default -> chunkCostDefault.get();
+			};
 		}
 	}
 
